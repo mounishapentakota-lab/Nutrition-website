@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personalized Diet Recommender</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for better readability and aesthetics */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fbfd;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 30px 10px;
+        }
+        .container {
+            max-width: 1200px;
+            width: 100%;
+        }
+        .table-header {
+            background-color: #0b1e3d;
+            color: white;
+        }
+        .table-row-odd {
+            background-color: #f3f4f6;
+        }
+        .table-row-even {
+            background-color: #ffffff;
+        }
+        .glow-button {
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px 0 rgba(49, 196, 190, 0.75);
+        }
+        .glow-button:hover {
+            box-shadow: 0 6px 20px 0 rgba(49, 196, 190, 0.9);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container bg-white rounded-xl shadow-2xl p-6 md:p-10">
+    <h1 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-6 border-b pb-4">
+        Health Planner: BMI and Diet Recommendation
+    </h1>
+
+    <!-- Input Form Card -->
+    <div class="bg-indigo-50 p-6 rounded-lg shadow-md mb-8">
+        <h2 class="text-xl font-semibold text-indigo-700 mb-4">Enter Your Details (Calculates BMI)</h2>
+        <!-- Form updated to a responsive grid for 4 inputs + 1 button -->
+        <form id="dietForm" class="grid grid-cols-2 md:grid-cols-5 gap-4 items-end">
+            <!-- Name -->
+            <div class="col-span-2 md:col-span-1">
+                <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                <input type="text" id="name" required
+                       class="w-full p-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+            <!-- Age -->
+            <div class="col-span-1 md:col-span-1">
+                <label for="age" class="block text-sm font-medium text-gray-700 mb-1">Age</label>
+                <input type="number" id="age" required min="1" max="150"
+                       class="w-full p-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+            <!-- Height -->
+            <div class="col-span-1 md:col-span-1">
+                <label for="height" class="block text-sm font-medium text-gray-700 mb-1">Height (cm)</label>
+                <input type="number" id="height" required min="50" step="0.1"
+                       class="w-full p-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+            <!-- Weight -->
+            <div class="col-span-1 md:col-span-1">
+                <label for="weight" class="block text-sm font-medium text-gray-700 mb-1">Weight (kg)</label>
+                <input type="number" id="weight" required min="10" step="0.1"
+                       class="w-full p-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+            <!-- Button -->
+            <div class="col-span-2 md:col-span-1">
+                <button type="submit"
+                        class="glow-button w-full p-2.5 bg-cyan-500 text-white font-bold rounded-lg hover:bg-cyan-600 focus:outline-none focus:ring-4 focus:ring-cyan-300">
+                    Get My Meal Plan
+                </button>
+            </div>
+        </form>
+        <p id="error-message" class="mt-3 text-red-600 font-semibold hidden"></p>
+    </div>
+
+    <!-- Results Area -->
+    <div id="resultsContainer" class="hidden">
+        <div id="userInfo" class="bg-gray-100 p-4 rounded-lg mb-6 shadow-inner">
+            <h3 class="text-xl font-bold text-gray-800">Plan for <span id="userName" class="text-indigo-600"></span></h3>
+            <p class="text-gray-600">
+                Your calculated *BMI is <span id="userBMI" class="font-semibold text-xl text-indigo-700"></span>* (<span id="bmiCategory" class="font-semibold"></span>).
+                Based on this, we recommend the following plan:
+            </p>
+        </div>
+
+        <div id="dietPlanTitle" class="text-2xl font-bold text-gray-700 mb-4"></div>
+
+        <div class="overflow-x-auto rounded-lg shadow-xl">
+            <table id="dietTable" class="min-w-full divide-y divide-gray-200">
+                <thead>
+                    <tr id="tableHead" class="table-header text-xs uppercase tracking-wider">
+                        <!-- Table headers will be injected here -->
+                    </tr>
+                </thead>
+                <tbody id="tableBody" class="divide-y divide-gray-200">
+                    <!-- Table rows will be injected here -->
+                </tbody>
+            </table>
+        </div>
+        
+    </div>
+</div>
+
+<script>
+    const dietPlans = {
+        "Weight Gain Diet": { // Underweight Diet Plan (Goal: Healthy Weight Gain)
+            title: "1. Weight Gain & Nutrient-Dense Plan (7 Days)",
+            category: "Underweight",
+            data: [
+                ["Monday", "Oats with milk, banana, honey, and almonds", "Peanut butter toast", "Brown rice, chicken curry, mixed vegetables", "Smoothie (milk + oats + peanut butter + banana)", "Paneer (cottage cheese) with whole wheat roti"],
+                ["Tuesday", "Whole grain toast with eggs & avocado", "Mixed nuts", "Lentils, rice, and potato curry", "Yogurt with granola", "Grilled fish, quinoa, and sautéed spinach"],
+                ["Wednesday", "Paratha with curd & banana", "Fruit smoothie", "Chicken biryani & salad", "Cheese sandwich", "Pasta with veggies and olive oil"],
+                ["Thursday", "Scrambled eggs, toast, and milk", "Protein bar", "Rice, dal, & vegetable stir-fry", "Nuts & raisins", "Chicken stew with whole-grain bread"],
+                ["Friday", "Pancakes with maple syrup & fruit", "Milkshake", "Veg pulao with paneer curry", "Yogurt & dry fruits", "Grilled tofu, brown rice, and mixed veggies"],
+                ["Saturday", "Peanut butter banana smoothie", "Handful of almonds", "Chicken wrap with salad", "Fruit bowl", "Spaghetti with chicken and cheese"],
+                ["Sunday", "Omelette, toast, and milk", "Mixed nuts", "Vegetable khichdi with ghee", "Protein shake", "Grilled fish with mashed potatoes"]
+            ]
+        },
+        "Balanced Diet": { // Normal Weight Diet Plan (Goal: Maintenance / Balanced Nutrition)
+            title: "2. Balanced Diet Plan (7 Days)",
+            category: "Normal Weight",
+            data: [
+                ["Monday", "Oatmeal with fruits & nuts", "Apple slices", "Brown rice, dal, and veggies", "Yogurt", "Grilled chicken with salad"],
+                ["Tuesday", "Whole grain toast with boiled eggs", "Banana", "Quinoa bowl with chickpeas & spinach", "Mixed nuts", "Baked salmon with steamed broccoli"],
+                ["Wednesday", "Smoothie (berries, yogurt, oats)", "Boiled egg", "Chicken curry with brown rice", "Carrot sticks", "Veg stir-fry with tofu"],
+                ["Thursday", "Paratha with curd", "Orange", "Lentil soup & salad", "Handful of almonds", "Grilled paneer with quinoa"],
+                ["Friday", "Poha with peanuts", "Yogurt", "Grilled fish with mixed veggies", "Fruit salad", "Vegetable pasta"],
+                ["Saturday", "Scrambled eggs & toast", "Nuts", "Rajma rice & cucumber salad", "Greek yogurt", "Chicken wrap"],
+                ["Sunday", "Smoothie bowl (fruits + oats + chia seeds)", "Apple", "Vegetable pulao", "Peanut butter toast", "Grilled tofu & steamed veggies"]
+            ]
+        },
+        "Low Carb Diet": {
+            title: "3. Low Carb Diet Plan (7 Days)",
+            category: "Overweight",
+            data: [
+                ["Monday", "Scrambled eggs with spinach", "Almonds", "Grilled chicken salad", "Cheese cubes", "Salmon with zucchini noodles"],
+                ["Tuesday", "Omelette with mushrooms & peppers", "Celery sticks with peanut butter", "Turkey lettuce wraps", "Boiled eggs", "Grilled steak with steamed broccoli"],
+                ["Wednesday", "Greek yogurt with chia seeds", "Handful of walnuts", "Tuna salad", "Sliced cucumber", "Chicken stir-fry with cauliflower rice"],
+                ["Thursday", "Avocado smoothie", "Cheese sticks", "Egg salad with lettuce", "Almonds", "Baked cod with green beans"],
+                ["Friday", "Cottage cheese & berries", "Boiled eggs", "Chicken & veggie bowl", "Celery sticks", "Shrimp stir-fry with spinach"],
+                ["Saturday", "Protein pancakes (low carb)", "Mixed nuts", "Turkey salad", "Greek yogurt", "Grilled chicken with roasted cauliflower"],
+                ["Sunday", "Omelette with cheese & tomatoes", "Almonds", "Salmon salad", "Boiled eggs", "Tofu stir-fry with zucchini noodles"]
+            ]
+        },
+        "Low Sodium Diet": {
+            title: "4. Low Sodium Diet Plan (7 Days)",
+            category: "Obese",
+            data: [
+                ["Monday", "Oatmeal with fresh fruits (no added salt)", "Apple slices", "Grilled chicken with brown rice & steamed veggies", "Carrot sticks", "Baked salmon with asparagus"],
+                ["Tuesday", "Smoothie (banana, berries, almond milk)", "Unsalted nuts", "Lentil soup (low sodium) with quinoa", "Greek yogurt", "Tofu stir-fry with broccoli"],
+                ["Wednesday", "Whole grain toast with avocado", "Fresh berries", "Chicken salad with olive oil dressing", "Celery sticks", "Baked cod with roasted vegetables"],
+                ["Thursday", "Scrambled eggs with spinach", "Unsalted almonds", "Quinoa & veggie bowl", "Cottage cheese", "Grilled turkey with zucchini"],
+                ["Friday", "Yogurt with fresh fruit", "Apple slices", "Chickpea salad with olive oil", "Mixed nuts", "Grilled shrimp with steamed broccoli"],
+                ["Saturday", "Smoothie bowl with fruits & chia", "Carrot sticks", "Lentil salad", "Boiled eggs", "Baked chicken with green beans"],
+                ["Sunday", "Pancakes with fresh fruit", "Yogurt", "Quinoa with roasted vegetables", "Sliced cucumber", "Salmon with cauliflower"]
+            ]
+        }
+    };
+
+    const tableHeaders = ["Day", "Breakfast", "Snack 1", "Lunch", "Snack 2", "Dinner"];
+    const form = document.getElementById('dietForm');
+    const resultsContainer = document.getElementById('resultsContainer');
+    const tableBody = document.getElementById('tableBody');
+    const tableHead = document.getElementById('tableHead');
+    const dietPlanTitle = document.getElementById('dietPlanTitle');
+    const errorMessage = document.getElementById('error-message');
+    const userBMI = document.getElementById('userBMI');
+    const bmiCategory = document.getElementById('bmiCategory');
+    const userName = document.getElementById('userName');
+
+    // Populate table header once
+    tableHead.innerHTML = tableHeaders.map(header => `
+        <th scope="col" class="px-3 py-3 text-left font-bold text-white tracking-wider">
+            ${header}
+        </th>
+    `).join('');
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        errorMessage.classList.add('hidden');
+
+        const name = document.getElementById('name').value.trim();
+        const age = parseInt(document.getElementById('age').value);
+        const heightCm = parseFloat(document.getElementById('height').value);
+        const weight = parseFloat(document.getElementById('weight').value);
+
+        // --- VALIDATION START ---
+
+        // 1. Check for basic completeness and positive values
+        if (!name || isNaN(age) || isNaN(heightCm) || isNaN(weight) || age <= 0 || weight <= 0 || heightCm <= 0) {
+            errorMessage.textContent = "Please ensure your Name is entered and Age, Height, and Weight are filled correctly with positive numbers.";
+            errorMessage.classList.remove('hidden');
+            resultsContainer.classList.add('hidden');
+            return;
+        }
+
+        // 2. Check for minimum age requirement (Age must be 5 or above)
+        if (age < 5) {
+            errorMessage.textContent = "This personalized planner is designed for users aged 5 years and older. Please adjust your age.";
+            errorMessage.classList.remove('hidden');
+            resultsContainer.classList.add('hidden');
+            return;
+        }
+
+        // --- VALIDATION END ---
+
+        // 1. Calculate BMI
+        const heightM = heightCm / 100; // Convert cm to meters
+        const bmi = weight / (heightM * heightM);
+        const roundedBMI = bmi.toFixed(1);
+
+        // 2. Determine the recommended diet based on BMI (Updated Logic)
+        let recommendedDietKey;
+        let categoryText;
+
+        if (bmi < 18.5) {
+            recommendedDietKey = "Weight Gain Diet"; // Target: Underweight
+            categoryText = "Underweight";
+        } else if (bmi >= 18.5 && bmi <= 24.9) {
+            recommendedDietKey = "Balanced Diet"; // Target: Normal Weight
+            categoryText = "Normal Weight";
+        } else if (bmi >= 25.0 && bmi <= 29.9) {
+            recommendedDietKey = "Low Carb Diet";
+            categoryText = "Overweight";
+        } else { // bmi >= 30.0
+            recommendedDietKey = "Low Sodium Diet";
+            categoryText = "Obese";
+        }
+
+        const plan = dietPlans[recommendedDietKey];
+
+        // 3. Update User Info in Results Area
+        userName.textContent = name;
+        userBMI.textContent = roundedBMI;
+        bmiCategory.textContent = categoryText;
+
+        // 4. Update Diet Plan Title and Color
+        dietPlanTitle.textContent = plan.title;
+        dietPlanTitle.className = 'text-2xl font-bold mb-4 ' + (
+            recommendedDietKey === "Weight Gain Diet" ? 'text-orange-600' :
+            recommendedDietKey === "Balanced Diet" ? 'text-green-600' :
+            recommendedDietKey === "Low Carb Diet" ? 'text-red-600' :
+            'text-blue-600'
+        );
+
+        // 5. Generate Table Body
+        tableBody.innerHTML = ''; // Clear previous data
+        plan.data.forEach((rowData, index) => {
+            const row = document.createElement('tr');
+            row.className = index % 2 === 0 ? 'table-row-even' : 'table-row-odd';
+
+            rowData.forEach((cellData, cellIndex) => {
+                const cell = document.createElement('td');
+                // FIX: Changed from regular quotes to backticks (`) to properly create a template literal.
+                cell.className = `p-3 whitespace-nowrap text-sm text-gray-800 ${cellIndex === 0 ? 'font-semibold text-gray-900' : ''}`;
+                cell.textContent = cellData;
+                row.appendChild(cell);
+            });
+            tableBody.appendChild(row);
+        });
+
+        // 6. Show results
+        resultsContainer.classList.remove('hidden');
+    });
+</script>
+
+</body>
+</html>
